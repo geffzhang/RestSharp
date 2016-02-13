@@ -1,5 +1,62 @@
 # RestSharp Release Notes
 
+## 105.2.2
+
+* Added nuget targets for windows phone 8 and 8.1, monotouch10, monoandroid10, xamarin.ios10, net46
+* fixed the silverlight target to be sl5
+* added all projects to the solution
+* cleaned up and consolidated the build and packaging scripts
+* **Code clean-up and namespace patching may cause breaking changes**
+
+To see all commits for this version, [click here](https://github.com/RestSharp/RestSharp/compare/105.2.1...105.2.2).
+
+## 105.2.1
+
+* **Code clean-up and namespace patching may cause breaking changes**
+
+To see all commits for this version, [click here](https://github.com/RestSharp/RestSharp/compare/105.1.0...105.2.1).
+
+## 105.1.0
+
+To see all commits for this version, [click here](https://github.com/RestSharp/RestSharp/compare/105.0...105.1.0).
+
+## 105.0.1
+
+To see all commits for this version, [click here](https://github.com/RestSharp/RestSharp/compare/105.0...105.0.1).
+
+### Bug Fixes
+
+* Reverted changes to parameter encoding
+
+## 105.0.0
+
+To see all commits for this version, [click here](https://github.com/RestSharp/RestSharp/compare/104.5.0...105.0).
+
+### New Features/Improvements
+
+* Converted the BaseUrl to be a URI rather than a string **(potential breaking change)**
+* Updated the SimpleJson package to the latest version **(potential breaking change)**
+* Converted the use of tabs to spaces
+* Added support for the DeserializeAs attribute on XML
+* Added ability to deserialize into structs
+* Added additional methods on RestRequest
+  * `IRestRequest.AddJsonBody`
+  * `IRestRequest.AddXmlBody`
+  * `IRestRequest.AddQueryParameter`
+* Added support for multi-part form request to allow both a request body and files
+
+### Bug Fixes
+
+* Fixed potential Null Reference Exceptions on the parameters in RestClient (ToString usage)
+
+## 104.5.0
+
+To see all commits for this version, [click here](https://github.com/RestSharp/RestSharp/compare/104.4.0...104.5.0).
+
+## 104.4.0
+
+To see all commits for this version, [click here](https://github.com/RestSharp/RestSharp/compare/104.3.3...104.4.0).
+
 ## 104.3.3
 
 To see all commits for this version, [click here](https://github.com/RestSharp/RestSharp/compare/104.2...104.3.3).

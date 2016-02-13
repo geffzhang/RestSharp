@@ -1,46 +1,55 @@
 ﻿using System;
 using System.IO;
+using NUnit.Framework;
 using RestSharp.IntegrationTests.Helpers;
-using Xunit;
 
 namespace RestSharp.IntegrationTests
 {
-	public class FileTests
-	{
-		[Fact]
-		public void Handles_Binary_File_Download()
-		{
-			const string baseUrl = "http://localhost:8080/";
-			using (SimpleServer.Create(baseUrl, Handlers.FileHandler))
-			{
-				var client = new RestClient(baseUrl);
-				var request = new RestRequest("Assets/Koala.jpg");
-				var response = client.DownloadData(request);
+    [TestFixture]
+    public class FileTests
+    {
+        [Test]
+        public void Handles_Binary_File_Download()
+        {
+            Uri baseUrl = new Uri("http://localhost:8888/");
 
-				var expected = File.ReadAllBytes(Environment.CurrentDirectory + "\\Assets\\Koala.jpg");
-				Assert.Equal(expected, response);
-			}
-		}
+            using (SimpleServer.Create(baseUrl.AbsoluteUri, Handlers.FileHandler))
+            {
+                RestClient client = new RestClient(baseUrl);
+                RestRequest request = new RestRequest("Assets/Koala.jpg");
+                byte[] response = client.DownloadData(request);
+                byte[] expected = File.ReadAllBytes(Environment.CurrentDirectory + "\\Assets\\Koala.jpg");
 
-		[Fact]
-		public void Writes_Response_To_Stream()
-		{
-			const string baseUrl = "http://localhost:8080/";
-			using (SimpleServer.Create(baseUrl, Handlers.FileHandler))
-			{
-				string tempFile = Path.GetTempFileName();
-				using (var writer = File.OpenWrite(tempFile))
-				{
-					var client = new RestClient(baseUrl);
-					var request = new RestRequest("Assets/Koala.jpg");
-					request.ResponseWriter = (responseStream) => responseStream.CopyTo(writer);
-					var response = client.DownloadData(request);
-					Assert.Null(response);
-				}
-				var fromTemp = File.ReadAllBytes(tempFile);
-				var expected = File.ReadAllBytes(Environment.CurrentDirectory + "\\Assets\\Koala.jpg");
-				Assert.Equal(expected, fromTemp);
-			}
-		}
-	}
+                Assert.AreEqual(expected, response);
+            }
+        }
+
+        [Test]
+        public void Writes_Response_To_Stream()
+        {
+            const string baseUrl = "http://localhost:8888/";
+
+            using (SimpleServer.Create(baseUrl, Handlers.FileHandler))
+            {
+                string tempFile = Path.GetTempFileName();
+
+                using (FileStream writer = File.OpenWrite(tempFile))
+                {
+                    RestClient client = new RestClient(baseUrl);
+                    RestRequest request = new RestRequest("Assets/Koala.jpg")
+                                          {
+                                              ResponseWriter = (responseStream) => responseStream.CopyTo(writer)
+                                          };
+                    byte[] response = client.DownloadData(request);
+
+                    Assert.Null(response);
+                }
+
+                byte[] fromTemp = File.ReadAllBytes(tempFile);
+                byte[] expected = File.ReadAllBytes(Environment.CurrentDirectory + "\\Assets\\Koala.jpg");
+
+                Assert.AreEqual(expected, fromTemp);
+            }
+        }
+    }
 }

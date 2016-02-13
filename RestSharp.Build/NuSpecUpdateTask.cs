@@ -1,17 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Text;
-using Microsoft.Build.Utilities;
 using System.Reflection;
 using System.Xml.Linq;
-using System.IO;
+using Microsoft.Build.Utilities;
 
 namespace RestSharp.Build
 {
     public class NuSpecUpdateTask : Task
     {
-        private Assembly _assembly;
+        private Assembly assembly;
 
         public string Id { get; private set; }
 
@@ -25,51 +23,55 @@ namespace RestSharp.Build
 
         public string SourceAssemblyFile { get; set; }
 
-        public NuSpecUpdateTask()
-            : this(null)
-        {
-        }
+        public NuSpecUpdateTask() : this(null) { }
 
         public NuSpecUpdateTask(Assembly assembly)
         {
-            this._assembly = assembly;
+            this.assembly = assembly;
         }
 
         public override bool Execute()
         {
-            if (string.IsNullOrEmpty(this.SpecFile)) return false;
+            if (string.IsNullOrEmpty(this.SpecFile))
+                return false;
 
             var path = Path.GetFullPath(this.SourceAssemblyFile);
-            this._assembly = this._assembly ?? Assembly.LoadFile(path);
+            this.assembly = this.assembly ?? Assembly.LoadFile(path);
 
-            var name = this._assembly.GetName();
+            var name = this.assembly.GetName();
 
+#if SIGNED
+            this.Id = name.Name + "Signed";
+#else
             this.Id = name.Name;
-            this.Authors = this.GetAuthors(this._assembly);
-            this.Description = this.GetDescription(this._assembly);
-            this.Version = this.GetVersion(this._assembly);
+#endif
+            this.Authors = GetAuthors(this.assembly);
+            this.Description = GetDescription(this.assembly);
+            this.Version = GetVersion(this.assembly);
 
-            this.GenerateComputedSpecFile();            
-            
+            this.GenerateComputedSpecFile();
+
             return true;
         }
 
         private void GenerateComputedSpecFile()
         {
             var doc = XDocument.Load(this.SpecFile);
-            
             var metaNode = doc.Descendants("metadata").First();
-            
-            this.ReplaceToken(metaNode, "id", this.Id);
-            this.ReplaceToken(metaNode, "authors", this.Authors);
-            this.ReplaceToken(metaNode, "owners", this.Authors);
-            this.ReplaceToken(metaNode, "description", this.Description);
-            this.ReplaceToken(metaNode, "version", this.Version);
 
+            ReplaceToken(metaNode, "id", this.Id);
+            ReplaceToken(metaNode, "authors", this.Authors);
+            ReplaceToken(metaNode, "owners", this.Authors);
+            ReplaceToken(metaNode, "description", this.Description);
+            ReplaceToken(metaNode, "version", this.Version);
+#if SIGNED
+            doc.Save(this.SpecFile.Replace(".nuspec", "-signed-computed.nuspec"));
+#else
             doc.Save(this.SpecFile.Replace(".nuspec", "-computed.nuspec"));
+#endif
         }
 
-        private void ReplaceToken(XElement metaNode, XName name, string value)
+        private static void ReplaceToken(XContainer metaNode, XName name, string value)
         {
             var node = metaNode.Element(name);
             var token = string.Format("${0}$", name.ToString().TrimEnd('s'));
@@ -79,26 +81,26 @@ namespace RestSharp.Build
                 token = "$author$";
             }
 
-            if (node.Value.Equals(token, StringComparison.OrdinalIgnoreCase))
+            if (node != null && node.Value.Equals(token, StringComparison.OrdinalIgnoreCase))
             {
                 node.SetValue(value);
             }
         }
 
-        private string GetDescription(Assembly asm)
+        private static string GetDescription(ICustomAttributeProvider asm)
         {
-            return this.GetAttribute<AssemblyDescriptionAttribute>(asm).Description;
+            return GetAttribute<AssemblyDescriptionAttribute>(asm).Description;
         }
 
-        private string GetAuthors(Assembly asm)
+        private static string GetAuthors(ICustomAttributeProvider asm)
         {
-            return this.GetAttribute<AssemblyCompanyAttribute>(asm).Company;
+            return GetAttribute<AssemblyCompanyAttribute>(asm).Company;
         }
 
-        private string GetVersion(Assembly asm)
+        private static string GetVersion(Assembly asm)
         {
             var version = asm.GetName().Version.ToString();
-            var attr = this.GetAttribute<AssemblyInformationalVersionAttribute>(asm);
+            var attr = GetAttribute<AssemblyInformationalVersionAttribute>(asm);
 
             if (attr != null)
             {
@@ -108,15 +110,16 @@ namespace RestSharp.Build
             return version;
         }
 
-        private TAttr GetAttribute<TAttr>(Assembly asm) where TAttr : Attribute
+        private static TAttr GetAttribute<TAttr>(ICustomAttributeProvider asm) where TAttr : Attribute
         {
             var attrs = asm.GetCustomAttributes(typeof(TAttr), false);
+
             if (attrs.Length > 0)
             {
                 return attrs[0] as TAttr;
             }
 
             return null;
-        }        
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿#region License
+
 //   Copyright 2010 John Sheehan
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,30 +13,34 @@
 //   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //   See the License for the specific language governing permissions and
 //   limitations under the License. 
+
 #endregion
 
 using System.Xml.Linq;
 
 namespace RestSharp.Extensions
 {
-	/// <summary>
-	/// XML Extension Methods
-	/// </summary>
-	public static class XmlExtensions
-	{
-		/// <summary>
-		/// Returns the name of an element with the namespace if specified
-		/// </summary>
-		/// <param name="name">Element name</param>
-		/// <param name="namespace">XML Namespace</param>
-		/// <returns></returns>
-		public static XName AsNamespaced(this string name, string @namespace) {
-			XName xName = name;
+    /// <summary>
+    /// XML Extension Methods
+    /// </summary>
+    public static class XmlExtensions
+    {
+        /// <summary>
+        /// Returns the name of an element with the namespace if specified
+        /// </summary>
+        /// <param name="name">Element name</param>
+        /// <param name="namespace">XML Namespace</param>
+        /// <returns></returns>
+        public static XName AsNamespaced(this string name, string @namespace)
+        {
+            XName xName = name;
 
-			if (@namespace.HasValue())
-				xName = XName.Get(name, @namespace);
+            if (@namespace.HasValue())
+            {
+                xName = XName.Get(name, @namespace);
+            }
 
-			return xName;
-		}
-	}
+            return xName;
+        }
+    }
 }

@@ -1,4 +1,5 @@
 ﻿#region License
+
 //   Copyright 2010 John Sheehan
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,16 +13,21 @@
 //   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //   See the License for the specific language governing permissions and
 //   limitations under the License. 
+
 #endregion
 
 namespace RestSharp.Serializers
 {
-	public interface ISerializer
-	{
-		string Serialize(object obj);
-		string RootElement { get; set; }
-		string Namespace { get; set; }
-		string DateFormat { get; set; }
-		string ContentType { get; set; }
-	}
+    public interface ISerializer
+    {
+        string Serialize(object obj);
+
+        string RootElement { get; set; }
+
+        string Namespace { get; set; }
+
+        string DateFormat { get; set; }
+
+        string ContentType { get; set; }
+    }
 }
