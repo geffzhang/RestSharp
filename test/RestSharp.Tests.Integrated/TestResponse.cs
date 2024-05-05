@@ -1,0 +1,1 @@
+namespace RestSharp.Tests.Integrated;

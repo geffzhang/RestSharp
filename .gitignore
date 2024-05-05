@@ -1,4 +1,6 @@
-packages
+packages/
+nuget.config
+
 
 #ignore thumbnails created by windows
 Thumbs.db
@@ -42,3 +44,15 @@ Backup/
 *.orig
 DownloadSigned/
 RestSharp.IntegrationTests/config.json
+/.idea/.idea.RestSharp
+/.vs/RestSharp/v15/sqlite3
+/RestSharp.UWP/project.lock.json
+*.ncrunchproject
+*.ncrunchsolution
+/.vs/RestSharp/v15/Server/sqlite3
+/.vs/
+/node_modules/
+/out/
+/docs/.vuepress/dist/
+.vscode/
+.temp/

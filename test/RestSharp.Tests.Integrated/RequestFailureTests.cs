@@ -1,0 +1,76 @@
+// ReSharper disable ClassNeverInstantiated.Local
+
+namespace RestSharp.Tests.Integrated;
+
+using Server;
+
+public class RequestFailureTests : IDisposable {
+    readonly WireMockServer _server = WireMockTestServer.StartTestServer();
+    readonly RestClient     _client;
+
+    public RequestFailureTests() => _client = new RestClient(_server.Url!);
+
+    [Fact]
+    public async Task Handles_GET_Request_Errors() {
+        var request  = new RestRequest("status?code=404");
+        var response = await _client.ExecuteAsync(request);
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task Handles_GET_Request_Errors_With_Response_Type() {
+        var request  = new RestRequest("status?code=404");
+        var response = await _client.ExecuteAsync<SuccessResponse>(request);
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        response.Data.Should().Be(null);
+    }
+
+    [Fact]
+    public async Task Throws_on_unsuccessful_call() {
+        using var client  = new RestClient(new RestClientOptions(_server.Url!) { ThrowOnAnyError = true });
+        var request = new RestRequest("status?code=500");
+
+        var task = () => client.ExecuteAsync<SuccessResponse>(request);
+        await task.Should().ThrowExactlyAsync<HttpRequestException>();
+    }
+
+    [Fact]
+    public async Task GetAsync_throws_on_unsuccessful_call() {
+        var request = new RestRequest("status?code=500");
+
+        var task = () => _client.GetAsync(request);
+        await task.Should().ThrowExactlyAsync<HttpRequestException>();
+    }
+
+    [Fact]
+    public async Task GetAsync_completes_on_404() {
+        var request = new RestRequest("status?code=404");
+
+        var response = await _client.GetAsync(request);
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        response.ResponseStatus.Should().Be(ResponseStatus.Completed);
+    }
+
+    [Fact]
+    public async Task GetAsync_generic_throws_on_unsuccessful_call() {
+        var request = new RestRequest("status?code=500");
+
+        var task = () => _client.GetAsync<SuccessResponse>(request);
+        await task.Should().ThrowExactlyAsync<HttpRequestException>();
+    }
+
+    [Fact]
+    public async Task GetAsync_returns_null_on_404() {
+        var request = new RestRequest("status?code=404");
+
+        var response = await _client.GetAsync<SuccessResponse>(request);
+        response.Should().BeNull();
+    }
+
+    public void Dispose() {
+        _server.Dispose();
+        _client.Dispose();
+    }
+}
